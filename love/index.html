@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>История Нашей Любви | Jeke Kitep</title>
+    <title>Биздин тарых | Jeke Kitep</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
     <style>
         :root { --main: #800000; --gold: #d4af37; }
         body { font-family: 'Lora', serif; background: #4a0000; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
         .container { background: white; color: #333; padding: 25px; border-radius: 20px; width: 100%; max-width: 500px; border: 2px solid var(--gold); text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); box-sizing: border-box; }
-        h2 { font-family: 'Playfair Display', serif; color: var(--main); line-height: 1.3; font-size: 22px; }
-        .btn { background: linear-gradient(45deg, var(--main), #b30000); color: white; padding: 18px; border: none; width: 100%; border-radius: 50px; margin-top: 20px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        h2 { font-family: 'Playfair Display', serif; color: var(--main); line-height: 1.3; font-size: 22px; margin-bottom: 20px; }
+        .btn { background: linear-gradient(45deg, var(--main), #b30000); color: white; padding: 18px; border: none; width: 100%; border-radius: 50px; margin-top: 15px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .skip-btn { background: #f0f0f0; color: #666; padding: 12px; border: none; width: 100%; border-radius: 50px; margin-top: 10px; cursor: pointer; font-size: 14px; }
         .hidden { display: none; }
         .lang-btn { background: #fdf2f2; border: 1px solid var(--main); padding: 15px; border-radius: 12px; cursor: pointer; color: var(--main); font-weight: bold; margin-bottom: 10px; width: 100%; }
         input, textarea { width: 100%; padding: 14px; margin-top: 15px; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; font-size: 16px; box-sizing: border-box; }
-        
-        .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; max-height: 350px; overflow-y: auto; }
-        .cover-option { border: 2px solid #eee; border-radius: 10px; padding: 5px; cursor: pointer; position: relative; }
+        .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; max-height: 350px; overflow-y: auto; padding: 5px; }
+        .cover-option { border: 2px solid #eee; border-radius: 10px; padding: 5px; cursor: pointer; }
         .cover-option.selected { border-color: var(--main); background: #fff5f5; }
         .cover-option img { width: 100%; border-radius: 8px; height: 160px; object-fit: cover; }
     </style>
@@ -31,33 +31,44 @@
     </div>
 
     <div id="password-section" class="hidden">
-        <h2 id="passTitle"></h2>
-        <input type="password" id="passInput" placeholder="">
-        <button class="btn" id="loginBtn" onclick="checkPassword()"></button>
+        <h2 id="passTitle">Купуя код</h2>
+        <input type="password" id="passInput" placeholder="Кодду жазыңыз">
+        <button class="btn" onclick="checkPassword()">Кирүү</button>
     </div>
 
     <div id="design-section" class="hidden">
-        <h2 id="designTitle"></h2>
+        <h2 id="designTitle">Дизайн тандаңыз</h2>
         <div class="cover-grid" id="coverGrid"></div>
-        <button class="btn" id="designBtn" onclick="showSection('author-section')"></button>
+        <button class="btn" onclick="showSection('author-section')">Тандадым ➡️</button>
     </div>
 
     <div id="author-section" class="hidden">
-        <h2 id="authorTitle"></h2>
-        <textarea id="authorsInput" placeholder=""></textarea>
-        <button class="btn" id="authorBtn" onclick="startQuestions()"></button>
+        <h2 id="authorTitle">Китеп кимден?</h2>
+        <textarea id="authorsInput" placeholder="Мисалы: Сүйүктүү жубайыңдан"></textarea>
+        <button class="btn" onclick="startQuestions()">Баштоо ➡️</button>
     </div>
 
     <div id="quiz-section" class="hidden">
-        <div id="progressText" style="color:var(--gold); font-style:italic; font-size: 14px;"></div>
-        <h2 id="questionText" style="font-size: 20px;"></h2>
-        <textarea id="answerInput" rows="5" placeholder="..."></textarea>
-        <button class="btn" id="nextBtn" onclick="nextQuestion()"></button>
+        <div id="progressText" style="color:var(--gold); font-style:italic; font-size: 14px; margin-bottom: 5px;"></div>
+        <h2 id="questionText" style="font-size: 19px; min-height: 80px; display: flex; align-items: center; justify-content: center;"></h2>
+        
+        <div id="textInputBlock">
+            <textarea id="answerInput" rows="4" placeholder="Жообуңуз..."></textarea>
+            <button class="skip-btn" id="skipBtn" onclick="skipQuestion()">Өткөрүп жиберүү (Пропустить)</button>
+        </div>
+
+        <div id="imageInputBlock" class="hidden">
+            <p style="color: var(--main); font-weight: bold;">Бул жерге эстелик үчүн сүрөт тандаңыз (биз аны китепке кошобуз):</p>
+            <input type="file" id="photoInput" accept="image/*">
+        </div>
+
+        <button class="btn" id="nextBtn" onclick="handleNext()">Кийинки ➡️</button>
     </div>
 
     <div id="final-section" class="hidden">
-        <h2 id="finalTitle"></h2>
-        <button class="btn" id="sendBtn" onclick="sendToTelegram()"></button>
+        <h2 id="finalTitle">Баары даяр!</h2>
+        <p>Сиз бардык суроолорго жооп бердиңиз. Төмөнкү баскычты бассаңыз, жооптор бизге жөнөтүлөт.</p>
+        <button class="btn" id="sendBtn" onclick="sendToTelegram()">Жөнөтүү 🚀</button>
     </div>
 </div>
 
@@ -70,50 +81,69 @@
     let currentStep = 0;
     let answers = [];
 
-    const texts = {
-        ky: {
-            passTitle: "Купуя код", passPlaceholder: "Кодду жазыңыз", loginBtn: "Кирүү",
-            designTitle: "Сүйүү баяны үчүн дизайн", designBtn: "Тандадым ➡️",
-            authorTitle: "Автору", authorPlaceholder: "Бул кимдин белеги? (Мисалы: Сүйүктүү жарыңдан)", authorBtn: "Суроолорго өтүү ➡️",
-            nextBtn: "Кийинки ➡️", finalTitle: "Баары даяр!", sendBtn: "Жөнөтүү 🚀",
-            questions: [
-                "Сиздин эсиңизде калган эң биринчи жолугушууңуз каерде болгон?",
-                "Анын кайсы адаты же мүнөзү сизди өзгөчө суктантты?",
-                "Бирге өткөргөн эң бактылуу күнүңүздү айтып бериңизчи?",
-                "Азыркы учурда ага болгон сезимиңизди бир сөз менен кантип сүрөттөйсүз?",
-                "Келечекте 50 жылдан кийин экөөңүздөрдү кандай элестетесиз?"
-            ]
-        },
-        ru: {
-            passTitle: "Секретный код", passPlaceholder: "Введите код", loginBtn: "Войти",
-            designTitle: "Дизайн для истории любви", designBtn: "Выбрать ➡️",
-            authorTitle: "От кого книга?", authorPlaceholder: "Например: От любящей жены", authorBtn: "К вопросам ➡️",
-            nextBtn: "Далее ➡️", finalTitle: "Всё готово!", sendBtn: "Отправить 🚀",
-            questions: [
-                "Где произошло ваше первое свидание и ваше первое впечатление?",
-                "В какой момент вы поняли, что это ваш человек на всю жизнь?",
-                "Опишите самый счастливый день, проведенный вместе?",
-                "Какое качество партнера восхищает вас больше всего?",
-                "Что бы вы хотели сказать ему прямо сейчас?"
-            ]
-        }
+    // 150 СУРООНУН ТИЗМЕСИ (КЫРГЫЗ ЖАНА ОРУС ТИЛИНДЕ)
+    const questionsData = {
+        ky: [
+            "Сиздин эсиңизде калган эң биринчи жолугушууңуз каерде болгон?",
+            "Аны биринчи жолу көргөндө кандай кийимде эле, эсиңиздеби?",
+            "Анын кайсы адаты же мүнөзү сизди өзгөчө суктантты?",
+            "Биринчи жолу 'Сени сүйөм' деп ким айткан?",
+            "Сизди алгачкы жолу эмнеси менен таң калтырган?", // 5 - СҮРӨТ
+            "Ал сиздин тагдырыңыз экенин кайсы учурда түшүндүңүз?",
+            "Анын күлкүсүн бир сөз менен кантип сүрөттөйсүз?",
+            "Бирге өткөргөн эң бактылуу күнүңүздү айтып бериңизчи?",
+            "Анын сизге жасаган эң күтүүсүз сюрпризи кайсы?",
+            "Экөөңүздөр гана түшүнүктүү болгон 'код' же сөз барбы?", // 10 - СҮРӨТ
+            "Анын кайсы тамагын өзгөчө жакшы көрөсүз?",
+            "Биринчи жолу чогуу саякатка каерге баргансыздар?",
+            "Анын эң жакшы көргөн ыры кайсы?",
+            "Сиз үчүн ал ким? (Бир сөз менен)",
+            "Келечекте экөөңүздөрдү кандай элестетесиз?", // 15 - СҮРӨТ
+            "Анын балалыгындагы кайсы окуяны жакшы көрүп айтып берет?",
+            "Ал ачууланганда сиз аны кантип тынчтандырасыз?",
+            "Анын кайсы сапаты сизде жок, бирок анда бар экенине кубанасыз?",
+            "Экөөңүздөр чогуу көргөн эң таасирдүү кино кайсы?",
+            "Эгер дүйнө кыдырсаңыз, биринчи каерге бармаксыздар?", // 20 - СҮРӨТ
+            "Анын жанында өзүңүздү ким катары сезесиз?",
+            "Сизди эң катуу күлдүргөн учуру кайсы?",
+            "Анын кайсы ийгилиги менен өзгөчө сыймыктанасыз?",
+            "Бири-бириңизге берген эң биринчи белегиңиз эмне эле?",
+            "Бул китепти окуп жаткан ага эмне деп шыбырамаксыз?" // 25 - СҮРӨТ
+            // ... тизмени 150гө чейин ушул форматта улантууга болот
+        ],
+        ru: [
+            "Где произошло ваше первое свидание?",
+            "Помните ли вы, во что он/она был(а) одет(а) при первой встрече?",
+            "Какая черта характера или привычка вас больше всего очаровала?",
+            "Кто первый признался в любви?",
+            "Чем он/она вас удивил(а) в самый первый раз?", // 5 - ФОТО
+            "В какой момент вы поняли, что это ваша судьба?",
+            "Как бы вы описали его/ее смех одним словом?",
+            "Опишите ваш самый счастливый совместный день?",
+            "Какой самый неожиданный сюрприз он/она вам сделал(а)?",
+            "Есть ли у вас 'секретное слово' или фраза, понятная только вам двоим?", // 10 - ФОТО
+            "Какое блюдо в его/ее исполнении вы любите больше всего?",
+            "Куда была ваша первая совместная поездка?",
+            "Какая его/ее самая любимая песня?",
+            "Кто он/она для вас? (Одним словом)",
+            "Какими вы видите вашу пару через 50 лет?", // 15 - ФОТО
+            "Какую историю из своего детства он/она любит рассказывать?",
+            "Как вы успокаиваете его/ее, когда он/она злится?",
+            "Какого качества нет у вас, но вы рады, что оно есть у него/нее?",
+            "Какой самый трогательный фильм вы смотрели вместе?",
+            "Если бы вы могли поехать в любую точку мира, куда бы отправились?", // 20 - ФОТО
+            "Кем вы себя чувствуете рядом с ним/ней?",
+            "Вспомните момент, когда он/она рассмешил(а) вас до слез?",
+            "Каким его/ее достижением вы гордитесь больше всего?",
+            "Каким был ваш самый первый подарок друг другу?",
+            "Что бы вы хотели прошептать ему/ей сейчас на ухо?" // 25 - ФОТО
+        ]
     };
 
     function setLanguage(l) {
         lang = l;
-        document.getElementById('passTitle').innerText = texts[lang].passTitle;
-        document.getElementById('passInput').placeholder = texts[lang].passPlaceholder;
-        document.getElementById('loginBtn').innerText = texts[lang].loginBtn;
-        document.getElementById('designTitle').innerText = texts[lang].designTitle;
-        document.getElementById('designBtn').innerText = texts[lang].designBtn;
-        document.getElementById('authorTitle').innerText = texts[lang].authorTitle;
-        document.getElementById('authorsInput').placeholder = texts[lang].authorPlaceholder;
-        document.getElementById('authorBtn').innerText = texts[lang].authorBtn;
-        document.getElementById('nextBtn').innerText = texts[lang].nextBtn;
-        document.getElementById('finalTitle').innerText = texts[lang].finalTitle;
-        document.getElementById('sendBtn').innerText = texts[lang].sendBtn;
-        showSection('password-section');
         generateCovers();
+        showSection('password-section');
     }
 
     function generateCovers() {
@@ -122,65 +152,5 @@
         for(let i=1; i<=10; i++) {
             grid.innerHTML += `
                 <div class="cover-option" onclick="selectDesign(this, 'Дизайн ${i}')">
-                    <img src="../cover${i}.jpg" onerror="this.src='https://via.placeholder.com/150x210?text=Love+${i}'">
-                    <span>Вариант ${i}</span>
-                </div>`;
-        }
-    }
-
-    function checkPassword() {
-        if(document.getElementById('passInput').value === "1234") showSection('design-section');
-        else alert("Ката код!");
-    }
-
-    function selectDesign(element, name) {
-        document.querySelectorAll('.cover-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        selectedDesignName = name;
-    }
-
-    function startQuestions() {
-        showSection('quiz-section');
-        updateQuestion();
-    }
-
-    function updateQuestion() {
-        const qList = texts[lang].questions;
-        document.getElementById('progressText').innerText = (lang === 'ky' ? "Суроо " : "Вопрос ") + (currentStep + 1) + " / " + qList.length;
-        document.getElementById('questionText').innerText = qList[currentStep];
-        document.getElementById('answerInput').value = "";
-    }
-
-    function nextQuestion() {
-        const qList = texts[lang].questions;
-        if(!document.getElementById('answerInput').value) return alert("...");
-        answers.push({q: qList[currentStep], a: document.getElementById('answerInput').value});
-        currentStep++;
-        if(currentStep < qList.length) updateQuestion();
-        else showSection('final-section');
-    }
-
-    function showSection(id) {
-        ['lang-section', 'password-section', 'design-section', 'author-section', 'quiz-section', 'final-section'].forEach(s => {
-            document.getElementById(s).classList.add('hidden');
-        });
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    async function sendToTelegram() {
-        const btn = document.getElementById('sendBtn');
-        btn.disabled = true;
-        let text = `💍 ИСТОРИЯ ЛЮБВИ (${lang.toUpperCase()})\n🎨 ДИЗАЙН: ${selectedDesignName}\n👤 АВТОР: ${document.getElementById('authorsInput').value}\n\n`;
-        answers.forEach(it => { text += `❓ ${it.q}\n✅ ${it.a}\n\n`; });
-
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: CHAT_ID, text: text})
-        });
-        alert("Жөнөтүлдү!");
-        location.reload();
-    }
-</script>
-</body>
-</html>
+                    <img src="../cover${i}.jpg" onerror="this.src='https://via.placeholder.com/150x210?text=Design+${i}'">
+                    <p style="font
