@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История Нашей Любви | Jeke Kitep</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root { --main: #800000; --gold: #d4af37; }
+        body { font-family: 'Lora', serif; background: #4a0000; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { background: white; color: #333; padding: 25px; border-radius: 20px; width: 100%; max-width: 500px; border: 2px solid var(--gold); text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); box-sizing: border-box; }
+        h2 { font-family: 'Playfair Display', serif; color: var(--main); line-height: 1.3; font-size: 22px; }
+        .btn { background: linear-gradient(45deg, var(--main), #b30000); color: white; padding: 18px; border: none; width: 100%; border-radius: 50px; margin-top: 20px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        .hidden { display: none; }
+        .lang-btn { background: #fdf2f2; border: 1px solid var(--main); padding: 15px; border-radius: 12px; cursor: pointer; color: var(--main); font-weight: bold; margin-bottom: 10px; width: 100%; }
+        input, textarea { width: 100%; padding: 14px; margin-top: 15px; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; font-size: 16px; box-sizing: border-box; }
+        
+        .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; max-height: 350px; overflow-y: auto; }
+        .cover-option { border: 2px solid #eee; border-radius: 10px; padding: 5px; cursor: pointer; position: relative; }
+        .cover-option.selected { border-color: var(--main); background: #fff5f5; }
+        .cover-option img { width: 100%; border-radius: 8px; height: 160px; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="lang-section">
+        <h2>Тилди тандаңыз / Выберите язык</h2>
+        <button class="lang-btn" onclick="setLanguage('ky')">Кыргыз тили 🇰🇬</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Русский язык 🇷🇺</button>
+    </div>
+
+    <div id="password-section" class="hidden">
+        <h2 id="passTitle"></h2>
+        <input type="password" id="passInput" placeholder="">
+        <button class="btn" id="loginBtn" onclick="checkPassword()"></button>
+    </div>
+
+    <div id="design-section" class="hidden">
+        <h2 id="designTitle"></h2>
+        <div class="cover-grid" id="coverGrid"></div>
+        <button class="btn" id="designBtn" onclick="showSection('author-section')"></button>
+    </div>
+
+    <div id="author-section" class="hidden">
+        <h2 id="authorTitle"></h2>
+        <textarea id="authorsInput" placeholder=""></textarea>
+        <button class="btn" id="authorBtn" onclick="startQuestions()"></button>
+    </div>
+
+    <div id="quiz-section" class="hidden">
+        <div id="progressText" style="color:var(--gold); font-style:italic; font-size: 14px;"></div>
+        <h2 id="questionText" style="font-size: 20px;"></h2>
+        <textarea id="answerInput" rows="5" placeholder="..."></textarea>
+        <button class="btn" id="nextBtn" onclick="nextQuestion()"></button>
+    </div>
+
+    <div id="final-section" class="hidden">
+        <h2 id="finalTitle"></h2>
+        <button class="btn" id="sendBtn" onclick="sendToTelegram()"></button>
+    </div>
+</div>
+
+<script>
+    const BOT_TOKEN = "8604545122:AAEx9ZLtB8Cwl1Juj7ue15ktZoB1UtrpBDQ";
+    const CHAT_ID = "5420064941";
+
+    let lang = 'ky';
+    let selectedDesignName = "";
+    let currentStep = 0;
+    let answers = [];
+
+    const texts = {
+        ky: {
+            passTitle: "Купуя код", passPlaceholder: "Кодду жазыңыз", loginBtn: "Кирүү",
+            designTitle: "Сүйүү баяны үчүн дизайн", designBtn: "Тандадым ➡️",
+            authorTitle: "Автору", authorPlaceholder: "Бул кимдин белеги? (Мисалы: Сүйүктүү жарыңдан)", authorBtn: "Суроолорго өтүү ➡️",
+            nextBtn: "Кийинки ➡️", finalTitle: "Баары даяр!", sendBtn: "Жөнөтүү 🚀",
+            questions: [
+                "Сиздин эсиңизде калган эң биринчи жолугушууңуз каерде болгон?",
+                "Анын кайсы адаты же мүнөзү сизди өзгөчө суктантты?",
+                "Бирге өткөргөн эң бактылуу күнүңүздү айтып бериңизчи?",
+                "Азыркы учурда ага болгон сезимиңизди бир сөз менен кантип сүрөттөйсүз?",
+                "Келечекте 50 жылдан кийин экөөңүздөрдү кандай элестетесиз?"
+            ]
+        },
+        ru: {
+            passTitle: "Секретный код", passPlaceholder: "Введите код", loginBtn: "Войти",
+            designTitle: "Дизайн для истории любви", designBtn: "Выбрать ➡️",
+            authorTitle: "От кого книга?", authorPlaceholder: "Например: От любящей жены", authorBtn: "К вопросам ➡️",
+            nextBtn: "Далее ➡️", finalTitle: "Всё готово!", sendBtn: "Отправить 🚀",
+            questions: [
+                "Где произошло ваше первое свидание и ваше первое впечатление?",
+                "В какой момент вы поняли, что это ваш человек на всю жизнь?",
+                "Опишите самый счастливый день, проведенный вместе?",
+                "Какое качество партнера восхищает вас больше всего?",
+                "Что бы вы хотели сказать ему прямо сейчас?"
+            ]
+        }
+    };
+
+    function setLanguage(l) {
+        lang = l;
+        document.getElementById('passTitle').innerText = texts[lang].passTitle;
+        document.getElementById('passInput').placeholder = texts[lang].passPlaceholder;
+        document.getElementById('loginBtn').innerText = texts[lang].loginBtn;
+        document.getElementById('designTitle').innerText = texts[lang].designTitle;
+        document.getElementById('designBtn').innerText = texts[lang].designBtn;
+        document.getElementById('authorTitle').innerText = texts[lang].authorTitle;
+        document.getElementById('authorsInput').placeholder = texts[lang].authorPlaceholder;
+        document.getElementById('authorBtn').innerText = texts[lang].authorBtn;
+        document.getElementById('nextBtn').innerText = texts[lang].nextBtn;
+        document.getElementById('finalTitle').innerText = texts[lang].finalTitle;
+        document.getElementById('sendBtn').innerText = texts[lang].sendBtn;
+        showSection('password-section');
+        generateCovers();
+    }
+
+    function generateCovers() {
+        const grid = document.getElementById('coverGrid');
+        grid.innerHTML = "";
+        for(let i=1; i<=10; i++) {
+            grid.innerHTML += `
+                <div class="cover-option" onclick="selectDesign(this, 'Дизайн ${i}')">
+                    <img src="../cover${i}.jpg" onerror="this.src='https://via.placeholder.com/150x210?text=Love+${i}'">
+                    <span>Вариант ${i}</span>
+                </div>`;
+        }
+    }
+
+    function checkPassword() {
+        if(document.getElementById('passInput').value === "1234") showSection('design-section');
+        else alert("Ката код!");
+    }
+
+    function selectDesign(element, name) {
+        document.querySelectorAll('.cover-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedDesignName = name;
+    }
+
+    function startQuestions() {
+        showSection('quiz-section');
+        updateQuestion();
+    }
+
+    function updateQuestion() {
+        const qList = texts[lang].questions;
+        document.getElementById('progressText').innerText = (lang === 'ky' ? "Суроо " : "Вопрос ") + (currentStep + 1) + " / " + qList.length;
+        document.getElementById('questionText').innerText = qList[currentStep];
+        document.getElementById('answerInput').value = "";
+    }
+
+    function nextQuestion() {
+        const qList = texts[lang].questions;
+        if(!document.getElementById('answerInput').value) return alert("...");
+        answers.push({q: qList[currentStep], a: document.getElementById('answerInput').value});
+        currentStep++;
+        if(currentStep < qList.length) updateQuestion();
+        else showSection('final-section');
+    }
+
+    function showSection(id) {
+        ['lang-section', 'password-section', 'design-section', 'author-section', 'quiz-section', 'final-section'].forEach(s => {
+            document.getElementById(s).classList.add('hidden');
+        });
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    async function sendToTelegram() {
+        const btn = document.getElementById('sendBtn');
+        btn.disabled = true;
+        let text = `💍 ИСТОРИЯ ЛЮБВИ (${lang.toUpperCase()})\n🎨 ДИЗАЙН: ${selectedDesignName}\n👤 АВТОР: ${document.getElementById('authorsInput').value}\n\n`;
+        answers.forEach(it => { text += `❓ ${it.q}\n✅ ${it.a}\n\n`; });
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: CHAT_ID, text: text})
+        });
+        alert("Жөнөтүлдү!");
+        location.reload();
+    }
+</script>
+</body>
+</html>
